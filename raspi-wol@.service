@@ -3,6 +3,8 @@ Description=Raspberry Pi Wake-on-LAN Service for %i
 After=network.target
 
 [Service]
+User=threedpro
+Group=threedpro
 ExecStart=/usr/bin/python3 /home/threedpro/raspi-wol/raspi-wol.py %I
 WorkingDirectory=/home/threedpro/raspi-wol/
 Restart=always
