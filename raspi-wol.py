@@ -6,8 +6,8 @@ import sys
 import logging
 
 # Configuration
-RELAY_PIN = 4  # Pin connected to the relay
-LED_PIN = 14
+RELAY_PIN = 24  # Pin connected to the relay
+LED_PIN = 23
 if len(sys.argv) != 2:
     print("Usage: python raspi-wol.py <MAC_ADDRESS>")
     sys.exit(1)
