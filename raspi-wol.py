@@ -12,12 +12,17 @@ RELAY_PIN = 24     # Pin connected to the relay
 LED_PIN = 23       # Pin connected to the LED
 PING_INTERVAL = 1  # Interval in seconds between pings
 
-if len(sys.argv) != 3:
-    print("Usage: python raspi-wol.py <MAC_ADDRESS> <PING_IP>")
+if len(sys.argv) != 2:
+    print("Usage: python raspi-wol.py <MAC_ADDRESS_IP>")
     sys.exit(1)
 
-MAC_ADDRESS = sys.argv[1]
-PING_IP = sys.argv[2]
+# Parse the combined argument
+try:
+    mac_ip = sys.argv[1]
+    MAC_ADDRESS, PING_IP = mac_ip.split('_')
+except ValueError:
+    print("Error: Argument must be in the format <MAC_ADDRESS>_<PING_IP>")
+    sys.exit(1)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
