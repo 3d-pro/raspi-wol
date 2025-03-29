@@ -4,15 +4,19 @@ import socket
 import struct
 import sys
 import logging
+import subprocess
 
 # Configuration
-RELAY_PIN = 24  # Pin connected to the relay
-LED_PIN = 23
-if len(sys.argv) != 2:
-    print("Usage: python raspi-wol.py <MAC_ADDRESS>")
+RELAY_PIN = 24     # Pin connected to the relay
+LED_PIN = 23       # Pin connected to the LED
+PING_INTERVAL = 1  # Interval in seconds between pings
+
+if len(sys.argv) != 3:
+    print("Usage: python raspi-wol.py <MAC_ADDRESS> <PING_IP>")
     sys.exit(1)
 
 MAC_ADDRESS = sys.argv[1]
+PING_IP = sys.argv[2]
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,20 +43,39 @@ def send_wol_packet(mac_address):
     sock.close()
     logging.info("WOL packet sent successfully")
 
+def is_host_reachable(ip):
+    """Ping the given IP address and return True if reachable, False otherwise."""
+    try:
+        subprocess.run(["ping", "-c", "1", "-W", "1", ip], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
 try:
-    logging.info("Script started, monitoring relay state")
+    logging.info("Script started, monitoring relay state and pinging IP")
     relay_state = GPIO.input(RELAY_PIN)
+    led_on = False  # Track LED state
     while True:
+        # Monitor relay state
         current_state = GPIO.input(RELAY_PIN)
         if current_state == GPIO.HIGH and relay_state == GPIO.LOW:
             logging.info("Relay turned on")
-            GPIO.output(LED_PIN, GPIO.HIGH)
             send_wol_packet(MAC_ADDRESS)
-            time.sleep(1)  # Keep the LED on for 1 second
-            GPIO.output(LED_PIN, GPIO.LOW)
-            logging.info("LED turned off")
         relay_state = current_state
-        time.sleep(0.1)  # Polling interval
+
+        # Ping IP and control LED
+        if is_host_reachable(PING_IP):
+            if not led_on:
+                GPIO.output(LED_PIN, GPIO.HIGH)
+                logging.info(f"Host {PING_IP} is reachable, LED turned on")
+                led_on = True
+        else:
+            if led_on:
+                GPIO.output(LED_PIN, GPIO.LOW)
+                logging.info(f"Host {PING_IP} is unreachable, LED turned off")
+                led_on = False
+
+        time.sleep(PING_INTERVAL)  # Polling interval
 except KeyboardInterrupt:
     logging.info("Script interrupted by user")
 finally:
