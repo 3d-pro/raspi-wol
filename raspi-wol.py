@@ -5,6 +5,7 @@ import struct
 import sys
 import logging
 import subprocess
+import os
 
 # Configuration
 RELAY_PIN = 24     # Pin connected to the relay
@@ -25,6 +26,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RELAY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(LED_PIN, GPIO.OUT)
+
+PID_FILE = "/var/run/raspi-wol.pid"
+
+def create_pid_file():
+    """Create a PID file to store the process ID."""
+    pid = os.getpid()
+    with open(PID_FILE, 'w') as f:
+        f.write(str(pid))
+    logging.info(f"PID file created at {PID_FILE} with PID {pid}")
+
+def remove_pid_file():
+    """Remove the PID file."""
+    if os.path.exists(PID_FILE):
+        os.remove(PID_FILE)
+        logging.info(f"PID file {PID_FILE} removed")
 
 def send_wol_packet(mac_address):
     logging.info(f"Sending WOL packet to MAC address: {mac_address}")
@@ -52,6 +68,7 @@ def is_host_reachable(ip):
         return False
 
 try:
+    create_pid_file()
     logging.info("Script started, monitoring relay state and pinging IP")
     relay_state = GPIO.input(RELAY_PIN)
     led_on = False  # Track LED state
@@ -80,4 +97,5 @@ except KeyboardInterrupt:
     logging.info("Script interrupted by user")
 finally:
     GPIO.cleanup()
+    remove_pid_file()
     logging.info("GPIO cleanup done")
