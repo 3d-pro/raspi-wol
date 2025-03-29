@@ -1,11 +1,5 @@
 import RPi.GPIO as GPIO
-import time
-import socket
-import struct
-import sys
-import logging
-import subprocess
-import os
+import time, socket, struct, sys, logging, subprocess, os, signal
 
 # Configuration
 RELAY_PIN           = 24 # Pin connected to the relay
@@ -79,6 +73,18 @@ def log_debug_info():
     logging.info(f"MAC_ADDRESS: {MAC_ADDRESS}, PING_IP: {PING_IP}")
     logging.info(f"PID_FILE: {PID_FILE}")
     logging.info(f"GPIO mode: {GPIO.getmode()}, RELAY_PIN: {RELAY_PIN}, LED_PIN: {LED_PIN}")
+
+def handle_exit_signal(signum, frame):
+    """Handle termination signals to clean up GPIO and remove PID file."""
+    logging.info(f"Received termination signal: {signum}")
+    GPIO.cleanup()
+    remove_pid_file()
+    logging.info("GPIO cleanup done, exiting...")
+    sys.exit(0)
+
+# Register signal handlers
+signal.signal(signal.SIGTERM, handle_exit_signal)
+signal.signal(signal.SIGINT, handle_exit_signal)
 
 try:
     log_debug_info()
