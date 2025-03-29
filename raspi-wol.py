@@ -20,7 +20,7 @@ except ValueError:
     sys.exit(1)
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
@@ -34,16 +34,14 @@ def create_pid_file():
     pid = os.getpid()
     with open(PID_FILE, 'w') as f:
         f.write(str(pid))
-    logging.info(f"PID file created at {PID_FILE} with PID {pid}")
 
 def remove_pid_file():
     """Remove the PID file."""
     if os.path.exists(PID_FILE):
         os.remove(PID_FILE)
-        logging.info(f"PID file {PID_FILE} removed")
 
 def send_wol_packet(mac_address):
-    logging.info(f"Sending WOL packet to MAC address: {mac_address}")
+    logging.warning(f"Sending WOL packet to MAC address: {mac_address}")
     # Construct the Wake-on-LAN "Magic Packet"
     mac_address = mac_address.replace(':', '')
     data = 'FF' * 6 + mac_address * 16
@@ -57,7 +55,6 @@ def send_wol_packet(mac_address):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.sendto(send_data, ('<broadcast>', 9))
     sock.close()
-    logging.info("WOL packet sent successfully")
 
 def is_host_reachable(ip):
     """Ping the given IP address and return True if reachable, False otherwise."""
@@ -68,22 +65,19 @@ def is_host_reachable(ip):
         return False
 
 def log_debug_info():
-    """Log debug information for systemd troubleshooting."""
-    logging.info(f"Script executed with PID: {os.getpid()}")
-    logging.info(f"MAC_ADDRESS: {MAC_ADDRESS}, PING_IP: {PING_IP}")
-    logging.info(f"PID_FILE: {PID_FILE}")
-    logging.info(f"GPIO mode: {GPIO.getmode()}, RELAY_PIN: {RELAY_PIN}, LED_PIN: {LED_PIN}")
+    """Log essential debug information for systemd troubleshooting."""
+    logging.warning(f"Script executed with PID: {os.getpid()}")
+    logging.warning(f"MAC_ADDRESS: {MAC_ADDRESS}, PING_IP: {PING_IP}")
+    logging.warning(f"PID_FILE: {PID_FILE}")
+    logging.warning(f"GPIO mode: {GPIO.getmode()}, RELAY_PIN: {RELAY_PIN}, LED_PIN: {LED_PIN}")
 
 def cleanup():
     """Perform cleanup tasks such as GPIO cleanup and removing the PID file."""
-    logging.info("Performing cleanup tasks...")
     GPIO.cleanup()
     remove_pid_file()
-    logging.info("Cleanup completed.")
 
 def handle_exit_signal(signum, frame):
     """Handle termination signals to clean up resources."""
-    logging.info(f"Received termination signal: {signum}")
     cleanup()
     sys.exit(0)
 
@@ -97,7 +91,7 @@ atexit.register(cleanup)
 try:
     log_debug_info()
     create_pid_file()
-    logging.info("Script started, monitoring relay state and pinging IP")
+    logging.warning("Script started, monitoring relay state and pinging IP")
     relay_state = GPIO.input(RELAY_PIN)
     led_on = False  # Track LED state
     failed_pings = 0  # Track consecutive failed pings
@@ -106,7 +100,7 @@ try:
         # Monitor relay state
         current_state = GPIO.input(RELAY_PIN)
         if current_state == GPIO.HIGH and relay_state == GPIO.LOW:
-            logging.info("Relay turned on")
+            logging.warning("Relay turned on")
             send_wol_packet(MAC_ADDRESS)
         relay_state = current_state
 
@@ -115,17 +109,17 @@ try:
             failed_pings = 0
             if not led_on:
                 GPIO.output(LED_PIN, GPIO.HIGH)
-                logging.info(f"Host {PING_IP} is reachable, LED turned on")
+                logging.warning(f"Host {PING_IP} is reachable, LED turned on")
                 led_on = True
         else:
             failed_pings += 1
             if failed_pings >= PING_FAIL_THRESHOLD and led_on:
                 GPIO.output(LED_PIN, GPIO.LOW)
-                logging.info(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
+                logging.warning(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
                 led_on = False
 
         time.sleep(PING_INTERVAL)  # Polling interval
 except KeyboardInterrupt:
-    logging.info("Script interrupted by user")
+    pass
 finally:
     cleanup()
