@@ -134,6 +134,34 @@ To start the service for the first example:
 sudo systemctl start raspi-wol@AA:BB:CC:DD:EE:FF_192.168.1.100.service
 ```
 
+## Updating the Service
+
+If you make changes to the `raspi-wol@.service` file or other project files, you can use the `update-service.sh` script to update and restart the service. Follow these steps:
+
+1. Ensure you are in the project directory:
+   ```bash
+   cd /path/to/raspi-wol
+   ```
+
+2. Run the `update-service.sh` script:
+   ```bash
+   ./update-service.sh
+   ```
+
+   This script will:
+   - Pull the latest changes from the repository.
+   - Stop the currently running service.
+   - Copy the updated `raspi-wol@.service` file to `/etc/systemd/system/`.
+   - Reload the systemd daemon.
+   - Restart the service.
+
+3. Verify the service is running:
+   ```bash
+   sudo systemctl status raspi-wol@<MAC_ADDRESS>_<IP_ADDRESS>.service
+   ```
+
+Replace `<MAC_ADDRESS>` and `<IP_ADDRESS>` with the appropriate values for your setup.
+
 ## Troubleshooting
 
 - Check the service logs for debugging:
