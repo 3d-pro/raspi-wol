@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-import time, socket, struct, sys, logging, subprocess, os, signal
+import time, socket, struct, sys, logging, subprocess, os, signal, atexit
 
 # Configuration
 RELAY_PIN           = 24 # Pin connected to the relay
@@ -74,17 +74,25 @@ def log_debug_info():
     logging.info(f"PID_FILE: {PID_FILE}")
     logging.info(f"GPIO mode: {GPIO.getmode()}, RELAY_PIN: {RELAY_PIN}, LED_PIN: {LED_PIN}")
 
-def handle_exit_signal(signum, frame):
-    """Handle termination signals to clean up GPIO and remove PID file."""
-    logging.info(f"Received termination signal: {signum}")
+def cleanup():
+    """Perform cleanup tasks such as GPIO cleanup and removing the PID file."""
+    logging.info("Performing cleanup tasks...")
     GPIO.cleanup()
     remove_pid_file()
-    logging.info("GPIO cleanup done, exiting...")
+    logging.info("Cleanup completed.")
+
+def handle_exit_signal(signum, frame):
+    """Handle termination signals to clean up resources."""
+    logging.info(f"Received termination signal: {signum}")
+    cleanup()
     sys.exit(0)
 
 # Register signal handlers
 signal.signal(signal.SIGTERM, handle_exit_signal)
 signal.signal(signal.SIGINT, handle_exit_signal)
+
+# Register cleanup function with atexit
+atexit.register(cleanup)
 
 try:
     log_debug_info()
@@ -120,6 +128,4 @@ try:
 except KeyboardInterrupt:
     logging.info("Script interrupted by user")
 finally:
-    GPIO.cleanup()
-    remove_pid_file()
-    logging.info("GPIO cleanup done")
+    cleanup()
