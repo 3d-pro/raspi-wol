@@ -17,7 +17,7 @@ This project uses a PC power switch as a relay since it acts like a relay. Below
 
 Refer to the following pin diagram for Raspberry Pi Zero 2W to identify the GPIO pins:
 
-![Raspberry Pi Zero 2W Pinout](./image/raspi-zero2w-pin.jpg)
+![Raspberry Pi Zero 2W Pinout](./images/raspi-zero2w-pin.jpg)
 
 ### Power Switch Pin Installation
 
