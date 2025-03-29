@@ -6,7 +6,7 @@ import sys
 import logging
 
 # Configuration
-POWER_SWITCH_PIN = 4
+RELAY_PIN = 4  # Pin connected to the relay
 LED_PIN = 14
 if len(sys.argv) != 2:
     print("Usage: python raspi-wol.py <MAC_ADDRESS>")
@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(POWER_SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(RELAY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(LED_PIN, GPIO.OUT)
 
 def send_wol_packet(mac_address):
@@ -39,22 +39,20 @@ def send_wol_packet(mac_address):
     sock.close()
     logging.info("WOL packet sent successfully")
 
-def power_switch_callback(channel):
-    logging.info("Power switch pressed")
-    GPIO.output(LED_PIN, GPIO.HIGH)
-    send_wol_packet(MAC_ADDRESS)
-    time.sleep(1)  # Keep the LED on for 1 second
-    GPIO.output(LED_PIN, GPIO.LOW)
-    logging.info("LED turned off")
-
-# Add event detection for the power switch
-GPIO.add_event_detect(POWER_SWITCH_PIN, GPIO.RISING, callback=power_switch_callback, bouncetime=300)
-
 try:
-    logging.info("Script started, waiting for power switch press")
-    # Keep the script running
+    logging.info("Script started, monitoring relay state")
+    relay_state = GPIO.input(RELAY_PIN)
     while True:
-        time.sleep(1)
+        current_state = GPIO.input(RELAY_PIN)
+        if current_state == GPIO.HIGH and relay_state == GPIO.LOW:
+            logging.info("Relay turned on")
+            GPIO.output(LED_PIN, GPIO.HIGH)
+            send_wol_packet(MAC_ADDRESS)
+            time.sleep(1)  # Keep the LED on for 1 second
+            GPIO.output(LED_PIN, GPIO.LOW)
+            logging.info("LED turned off")
+        relay_state = current_state
+        time.sleep(0.1)  # Polling interval
 except KeyboardInterrupt:
     logging.info("Script interrupted by user")
 finally:
