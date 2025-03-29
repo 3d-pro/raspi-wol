@@ -8,7 +8,7 @@ Group=threedpro
 ExecStart=/usr/bin/python3 /home/threedpro/raspi-wol/raspi-wol.py %I
 WorkingDirectory=/home/threedpro/raspi-wol/
 Restart=always
-PIDFile=/run/raspi-wol-%i.pid
+PIDFile=/run/raspi-wol/raspi-wol-%i.pid
 
 [Install]
 WantedBy=multi-user.target
