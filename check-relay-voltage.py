@@ -6,7 +6,7 @@ GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
 GPIO.setwarnings(False)
 
 # Define the GPIO pin to check
-RELAY_PIN = 2  # Change this to the GPIO pin you are using
+RELAY_PIN = 24  # Change this to the GPIO pin you are using
 
 # Set up the GPIO pin as an input
 GPIO.setup(RELAY_PIN, GPIO.IN)
