@@ -28,17 +28,9 @@ GPIO.setup(RELAY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(LED_PIN, GPIO.OUT)
 
 PID_FILE = f"/run/raspi-wol/raspi-wol-{os.getpid()}.pid"
-PID_DIR = "/run/raspi-wol"
-
-def create_pid_directory():
-    """Create the PID directory if it does not exist."""
-    if not os.path.exists(PID_DIR):
-        os.makedirs(PID_DIR, exist_ok=True)
-        logging.info(f"PID directory {PID_DIR} created")
 
 def create_pid_file():
     """Create a PID file to store the process ID."""
-    create_pid_directory()
     pid = os.getpid()
     with open(PID_FILE, 'w') as f:
         f.write(str(pid))
