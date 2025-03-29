@@ -67,7 +67,15 @@ def is_host_reachable(ip):
     except subprocess.CalledProcessError:
         return False
 
+def log_debug_info():
+    """Log debug information for systemd troubleshooting."""
+    logging.info(f"Script executed with PID: {os.getpid()}")
+    logging.info(f"MAC_ADDRESS: {MAC_ADDRESS}, PING_IP: {PING_IP}")
+    logging.info(f"PID_FILE: {PID_FILE}")
+    logging.info(f"GPIO mode: {GPIO.getmode()}, RELAY_PIN: {RELAY_PIN}, LED_PIN: {LED_PIN}")
+
 try:
+    log_debug_info()
     create_pid_file()
     logging.info("Script started, monitoring relay state and pinging IP")
     relay_state = GPIO.input(RELAY_PIN)
