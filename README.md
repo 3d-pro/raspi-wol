@@ -4,10 +4,48 @@ This project allows you to use a Raspberry Pi to send Wake-on-LAN (WOL) packets 
 
 ## Prerequisites
 
-- Raspberry Pi with GPIO pins
-- Relay module and LED connected to the specified GPIO pins
+- Raspberry Pi with GPIO pins (Example in Raspberry Pi Zero 2W)
+- Relay module (e.g., PC power switch) and LED connected to the specified GPIO pins
 - Python 3 installed on the Raspberry Pi
 - Systemd installed for managing the service
+
+## Hardware Setup
+
+This project uses a PC power switch as a relay since it acts like a relay. Below are the instructions for connecting the power switch and LED pins to the Raspberry Pi:
+
+### Pin Diagram
+
+Refer to the following pin diagram for Raspberry Pi Zero 2W to identify the GPIO pins:
+
+![Raspberry Pi Zero 2W Pinout](./image/raspi-zero2w-pin.jpg)
+
+### Power Switch Pin Installation
+
+- Connect one pin of the power switch to any 3.3V or 5V pin on the Raspberry Pi.
+- Connect the other pin of the power switch to a GPIO pin (e.g., GPIO24).
+
+### LED Pin Installation
+
+- Connect the positive leg (longer leg) of the LED to a GPIO pin (e.g., GPIO23).
+- Connect the negative leg (shorter leg) of the LED to a Ground (GND) pin on the Raspberry Pi.
+
+Ensure the connections are secure and double-check the GPIO pin numbers used in your script.
+
+### Update the Script for Pin Configuration
+
+After installing the power switch and LED pins, update the `raspi-wol.py` script to match the GPIO pins you used. Open the script and modify the following lines:
+
+- Update the `RELAY_PIN` variable to the GPIO pin connected to the power switch:
+  ```python
+  RELAY_PIN = <your_relay_gpio_pin>
+  ```
+
+- Update the `LED_PIN` variable to the GPIO pin connected to the LED:
+  ```python
+  LED_PIN = <your_led_gpio_pin>
+  ```
+
+Replace `<your_relay_gpio_pin>` and `<your_led_gpio_pin>` with the actual GPIO pin numbers you used during installation.
 
 ### Update the Systemd Service File
 
