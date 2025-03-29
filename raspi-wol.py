@@ -8,9 +8,10 @@ import subprocess
 import os
 
 # Configuration
-RELAY_PIN = 24     # Pin connected to the relay
-LED_PIN = 23       # Pin connected to the LED
-PING_INTERVAL = 1  # Interval in seconds between pings
+RELAY_PIN           = 24 # Pin connected to the relay
+LED_PIN             = 23 # Pin connected to the LED
+PING_INTERVAL       = 1  # Interval in seconds between pings
+PING_FAIL_THRESHOLD = 3  # Number of failed pings before turning off the LED
 
 if len(sys.argv) != 2:
     print("Usage: python raspi-wol.py <MAC_ADDRESS_IP>")
@@ -85,6 +86,8 @@ try:
     logging.info("Script started, monitoring relay state and pinging IP")
     relay_state = GPIO.input(RELAY_PIN)
     led_on = False  # Track LED state
+    failed_pings = 0  # Track consecutive failed pings
+
     while True:
         # Monitor relay state
         current_state = GPIO.input(RELAY_PIN)
@@ -95,14 +98,16 @@ try:
 
         # Ping IP and control LED
         if is_host_reachable(PING_IP):
+            failed_pings = 0
             if not led_on:
                 GPIO.output(LED_PIN, GPIO.HIGH)
                 logging.info(f"Host {PING_IP} is reachable, LED turned on")
                 led_on = True
         else:
-            if led_on:
+            failed_pings += 1
+            if failed_pings >= PING_FAIL_THRESHOLD and led_on:
                 GPIO.output(LED_PIN, GPIO.LOW)
-                logging.info(f"Host {PING_IP} is unreachable, LED turned off")
+                logging.info(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
                 led_on = False
 
         time.sleep(PING_INTERVAL)  # Polling interval
