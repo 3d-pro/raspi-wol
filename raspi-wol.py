@@ -27,7 +27,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(RELAY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(LED_PIN, GPIO.OUT)
 
-PID_FILE = "/var/run/raspi-wol.pid"
+PID_FILE = "/run/raspi-wol.pid"
 
 def create_pid_file():
     """Create a PID file to store the process ID."""
