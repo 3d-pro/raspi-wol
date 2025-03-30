@@ -20,7 +20,7 @@ except ValueError:
     sys.exit(1)
 
 # Setup logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Setup GPIO
 GPIO.setmode(GPIO.BCM)
@@ -97,35 +97,27 @@ try:
     failed_pings = 0  # Track consecutive failed pings
 
     while True:
-        logging.debug("Entering main loop iteration...")  # Debug log for loop iteration
-
         # Monitor relay state
         current_state = GPIO.input(RELAY_PIN)
-        logging.debug(f"Current relay state: {current_state}, Previous relay state: {relay_state}")
         if current_state == GPIO.HIGH and relay_state == GPIO.LOW:
             logging.warning("Relay turned on")
             send_wol_packet(MAC_ADDRESS)
         relay_state = current_state
 
         # Ping IP and control LED
-        logging.debug(f"Pinging host {PING_IP}...")
         if is_host_reachable(PING_IP):
-            logging.debug(f"Host {PING_IP} is reachable.")
             failed_pings = 0
             if not led_on:
                 GPIO.output(LED_PIN, GPIO.HIGH)
                 logging.warning(f"Host {PING_IP} is reachable, LED turned on")
                 led_on = True
         else:
-            logging.debug(f"Host {PING_IP} is unreachable.")
             failed_pings += 1
-            logging.debug(f"Failed pings: {failed_pings}")
             if failed_pings >= PING_FAIL_THRESHOLD and led_on:
                 GPIO.output(LED_PIN, GPIO.LOW)
                 logging.warning(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
                 led_on = False
 
-        logging.debug(f"LED state: {'ON' if led_on else 'OFF'}, Failed pings: {failed_pings}")  # Debug log for LED state
         time.sleep(POLLING_INTERVAL)  # Polling interval
 except KeyboardInterrupt:
     pass
