@@ -105,14 +105,18 @@ try:
         relay_state = current_state
 
         # Ping IP and control LED
+        logging.debug(f"Pinging host {PING_IP}...")
         if is_host_reachable(PING_IP):
+            logging.debug(f"Host {PING_IP} is reachable.")
             failed_pings = 0
             if not led_on:
                 GPIO.output(LED_PIN, GPIO.HIGH)
                 logging.warning(f"Host {PING_IP} is reachable, LED turned on")
                 led_on = True
         else:
+            logging.debug(f"Host {PING_IP} is unreachable.")
             failed_pings += 1
+            logging.debug(f"Failed pings: {failed_pings}")
             if failed_pings >= PING_FAIL_THRESHOLD and led_on:
                 GPIO.output(LED_PIN, GPIO.LOW)
                 logging.warning(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
