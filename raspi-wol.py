@@ -4,7 +4,7 @@ import time, socket, struct, sys, logging, subprocess, os, signal, atexit
 # Configuration
 RELAY_PIN           = 24 # Pin connected to the relay
 LED_PIN             = 23 # Pin connected to the LED
-PING_INTERVAL       = 1  # Interval in seconds between pings
+POLLING_INTERVAL    = 1  # Polling interval in seconds
 PING_FAIL_THRESHOLD = 3  # Number of failed pings before turning off the LED
 
 if len(sys.argv) != 2:
@@ -122,7 +122,7 @@ try:
                 logging.warning(f"Host {PING_IP} is unreachable after {PING_FAIL_THRESHOLD} failed pings, LED turned off")
                 led_on = False
 
-        time.sleep(PING_INTERVAL)  # Polling interval
+        time.sleep(POLLING_INTERVAL)  # Polling interval
 except KeyboardInterrupt:
     pass
 finally:
