@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SERVICE_NAME="raspi-wol@10:FF:E0:B1:6E:F1_10.11.12.240.service"
+SERVICE_NAME="raspi-wol@34:5A:60:6B:84:78_10.11.12.240.service"
 SERVICE_FILE="raspi-wol@.service"
 
 # Pull the latest changes from the repository
